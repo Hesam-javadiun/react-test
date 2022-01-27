@@ -2,34 +2,34 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useCallback } from 'react';
 
 export default function useSquidGame(valitate) {
-  const [inputValue, setInputValue] = useState("");
-  const [marbles, setMarbles] = useState(10);
+  const [inputValue, setInputValue] = useState('');
+  const [guesserMarbles, setGuessertMarbles] = useState(10);
+  const [hiderMarbles, setHiderMarbles] = useState(10);
   const [isOdd, setIsOdd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('IN_PROGRESS');
   const [history, setHistory] = useState([]);
-  
+
   useEffect(() => {
-    if(marbles >= 20) setStatus("WIN")
-    if(marbles  === 0) setStatus("LOOSE")
-  }, [marbles])
+    if (guesserMarbles >= 20) setStatus('WIN');
+    if (guesserMarbles === 0) setStatus('LOOSE');
+  }, [guesserMarbles]);
 
-  
-
-  const onClick = useCallback(() => {
+  const onClick = () => {
     setLoading(true);
-    setHistory([...history, [0, 1]]);
-    valitate(isOdd, inputValue).then(res => {
+    valitate(isOdd, parseInt(inputValue)).then(res => {
+      console.log(res)
+      console.log(guesserMarbles, hiderMarbles)
       const resultArray = [
-        marbles + res >= 0 ? marbles + res : 0,
-        marbles - res >= 0 ? marbles - res : 0,
+        guesserMarbles + res >= 0 ? guesserMarbles + res : 0,
+        hiderMarbles - res >= 0 ? hiderMarbles - res : 0,
       ];
-      setMarbles(marbles + res >= 0 ? marbles + res : 0);
+      setGuessertMarbles(guesserMarbles + res >= 0 ? guesserMarbles + res : 0);
+      setHiderMarbles(hiderMarbles - res >= 0 ? hiderMarbles - res : 0);
       setHistory([...history, resultArray]);
       setLoading(false);
-      console.log(res);
-    })
-  },[]);
+    });
+  };
   const submit = { onClick, disabled: loading };
 
   const register = inputType => {
@@ -47,15 +47,15 @@ export default function useSquidGame(valitate) {
       type: inputType,
       ref: ref,
       onChange: inputType === 'checkbox' ? onChangeCheckBox : onChangeInput,
-      disabled: loading ,
+      disabled: loading,
     };
   };
 
   return {
-    register: register,
-    submit: submit,
+    register,
+    submit,
     isLoading: loading,
     gameStatus: status,
-    history: history,
+    history,
   };
-  }
+}
